@@ -19,9 +19,8 @@ from profile import ProfileFrame
 from register import RegisterFrame
 from search import SearchFrame
 from splash import SplashFrame
-from theme import theme_manager
 from ticket_booking import TicketBookingFrame
-from ui_utils import apply_theme_to_widget, c, ensure_assets
+from ui_utils import c, configure_ttk_styles, ensure_assets
 
 
 class LocsamApp(tk.Tk):
@@ -35,8 +34,10 @@ class LocsamApp(tk.Tk):
 
         self.selected_location_id = 1
         self.search_query = ""
+        self.current_frame_name = "SplashFrame"
 
         ensure_assets()
+        configure_ttk_styles()
 
         self.container = tk.Frame(self, bg=c("BACKGROUND"))
         self.container.pack(fill=tk.BOTH, expand=True)
@@ -77,20 +78,23 @@ class LocsamApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
     def show_frame(self, name):
+        self.current_frame_name = name
         frame = self.frames[name]
         frame.tkraise()
         if hasattr(frame, "on_show"):
             frame.on_show()
 
     def apply_theme(self):
-        self.title(t("app_title"))
+        """Rebuild all frames so every page picks up the new theme."""
+        saved = self.current_frame_name
+        for frame in self.frames.values():
+            frame.destroy()
+        self.frames.clear()
         self.configure(bg=c("BACKGROUND"))
         self.container.configure(bg=c("BACKGROUND"))
-        apply_theme_to_widget(self)
-        for name in ("HomeFrame", "ProfileFrame", "SearchFrame", "FavoritesFrame"):
-            frame = self.frames.get(name)
-            if frame and hasattr(frame, "on_show"):
-                frame.on_show()
+        configure_ttk_styles()
+        self._build_frames()
+        self.show_frame(saved)
 
 
 def main():

@@ -5,8 +5,14 @@ from tkinter import messagebox
 
 from i18n import t
 from models import store
-from theme import theme_manager
-from ui_utils import apply_theme_to_widget, bottom_nav, c, show_language_dialog
+from theme import CONTENT_MAX_WIDTH, PAD_LG, theme_manager
+from ui_utils import (
+    bottom_nav,
+    c,
+    create_card,
+    create_label,
+    show_language_dialog,
+)
 
 
 class ProfileFrame(tk.Frame):
@@ -30,43 +36,36 @@ class ProfileFrame(tk.Frame):
             name = t("guest")
             email = "guest@locsam.com"
 
-        header = tk.Frame(self.body, bg=c("PRIMARY"), padx=24, pady=28)
+        header = tk.Frame(self.body, bg=c("PRIMARY"), padx=PAD_LG, pady=28)
         header.pack(fill=tk.X)
 
-        avatar = tk.Frame(header, bg=c("WHITE"), width=64, height=64)
+        hdr_inner = tk.Frame(header, bg=c("PRIMARY"))
+        hdr_inner.pack(anchor="center")
+
+        avatar = tk.Frame(hdr_inner, bg=c("INPUT_BG"), width=68, height=68)
         avatar.pack(anchor="w")
         avatar.pack_propagate(False)
-        tk.Label(
+        create_label(
             avatar,
-            text=name[0].upper(),
-            font=("Segoe UI", 24, "bold"),
+            name[0].upper(),
+            style="title",
+            bg=c("INPUT_BG"),
             fg=c("PRIMARY"),
-            bg=c("WHITE"),
         ).place(relx=0.5, rely=0.5, anchor="center")
 
-        info = tk.Frame(header, bg=c("PRIMARY"))
+        info = tk.Frame(hdr_inner, bg=c("PRIMARY"))
         info.pack(fill=tk.X, pady=(14, 0))
-        self.name_label = tk.Label(
-            info,
-            text=name,
-            font=("Segoe UI", 18, "bold"),
-            fg=c("HEADER_TEXT"),
-            bg=c("PRIMARY"),
-            anchor="w",
+        create_label(info, name, style="heading", bg=c("PRIMARY"), fg=c("HEADER_TEXT")).pack(
+            fill=tk.X
         )
-        self.name_label.pack(fill=tk.X)
-        self.email_label = tk.Label(
-            info,
-            text=email,
-            font=("Segoe UI", 11),
-            fg=c("HEADER_SUB"),
-            bg=c("PRIMARY"),
-            anchor="w",
+        create_label(info, email, style="small", bg=c("PRIMARY"), fg=c("HEADER_SUB")).pack(
+            fill=tk.X
         )
-        self.email_label.pack(fill=tk.X)
 
-        menu = tk.Frame(self.body, bg=c("BACKGROUND"), padx=20, pady=12)
-        menu.pack(fill=tk.BOTH, expand=True)
+        menu_wrap = tk.Frame(self.body, bg=c("BACKGROUND"))
+        menu_wrap.pack(fill=tk.BOTH, expand=True, pady=PAD_LG)
+        menu = tk.Frame(menu_wrap, bg=c("BACKGROUND"))
+        menu.pack(anchor="center")
 
         items = [
             ("❤", "saved_places", "FavoritesFrame"),
@@ -79,28 +78,25 @@ class ProfileFrame(tk.Frame):
         ]
 
         for icon, key, target in items:
-            row = tk.Frame(menu, bg=c("CARD"), cursor="hand2")
+            row = create_card(menu, padx=16, pady=12)
             row.pack(fill=tk.X, pady=5)
-            inner = tk.Frame(row, bg=c("CARD"), padx=16, pady=14)
+            row.config(cursor="hand2")
+
+            inner = tk.Frame(row, bg=c("CARD"))
             inner.pack(fill=tk.X)
-            tk.Label(inner, text=icon, font=("Segoe UI", 14), bg=c("CARD")).pack(side=tk.LEFT)
-            tk.Label(
-                inner,
-                text=t(key),
-                font=("Segoe UI", 11),
-                fg=c("TEXT"),
-                bg=c("CARD"),
-            ).pack(side=tk.LEFT, padx=12)
+            create_label(inner, icon, style="body", bg=c("CARD")).pack(side=tk.LEFT)
+            create_label(inner, t(key), style="body", bg=c("CARD")).pack(
+                side=tk.LEFT, padx=12
+            )
             extra = ""
             if key == "dark_mode" and theme_manager.dark_mode:
                 extra = " ✓"
             if key == "language":
                 extra = f" ({store.settings.get('language', 'en').upper()})"
-            tk.Label(
+            create_label(
                 inner,
-                text=f"›{extra}",
-                font=("Segoe UI", 14),
-                fg=c("TEXT_LIGHT"),
+                f"›{extra}",
+                style="muted",
                 bg=c("CARD"),
             ).pack(side=tk.RIGHT)
 
@@ -137,11 +133,11 @@ class ProfileFrame(tk.Frame):
         elif key == "dark_mode":
             enabled = theme_manager.toggle()
             store.set_dark_mode(enabled)
+            self.controller.apply_theme()
             messagebox.showinfo(
                 "LOCSAM",
                 t("dark_enabled") if enabled else t("dark_disabled"),
             )
-            self.controller.apply_theme()
         elif key == "language":
             show_language_dialog(self, lambda: self.controller.apply_theme())
         elif target:

@@ -1,17 +1,27 @@
 """Map page with coordinates."""
 
 import tkinter as tk
+from tkinter import messagebox
 
-from config import BACKGROUND, CARD, PRIMARY, TEXT, TEXT_LIGHT
+from i18n import t
 from models import store
-from ui_utils import load_image, styled_button
+from theme import PAD_LG
+from ui_utils import (
+    back_button,
+    button_row,
+    c,
+    create_card,
+    create_label,
+    load_image,
+    styled_button,
+)
 
 
 class MapFrame(tk.Frame):
     def __init__(self, parent, controller):
-        super().__init__(parent, bg=BACKGROUND)
+        super().__init__(parent, bg=c("BACKGROUND"))
         self.controller = controller
-        self.body = tk.Frame(self, bg=BACKGROUND)
+        self.body = tk.Frame(self, bg=c("BACKGROUND"))
         self.body.pack(fill=tk.BOTH, expand=True)
 
     def on_show(self):
@@ -23,63 +33,45 @@ class MapFrame(tk.Frame):
         if not loc:
             return
 
-        back = tk.Label(
-            self.body,
-            text="← Back",
-            fg=PRIMARY,
-            bg=BACKGROUND,
-            font=("Segoe UI", 10, "underline"),
-            cursor="hand2",
-        )
-        back.pack(anchor="w", padx=16, pady=12)
-        back.bind(
-            "<Button-1>",
-            lambda e: self.controller.show_frame("LocationDetailsFrame"),
-        )
+        back_button(self.body, lambda: self.controller.show_frame("LocationDetailsFrame"))
 
-        tk.Label(
-            self.body,
-            text="Map",
-            font=("Segoe UI", 20, "bold"),
-            fg=TEXT,
-            bg=BACKGROUND,
-        ).pack(anchor="w", padx=16)
+        col = tk.Frame(self.body, bg=c("BACKGROUND"))
+        col.pack(anchor="center", padx=PAD_LG, pady=PAD_LG)
 
-        map_img = load_image("map", size=(380, 280))
-        lbl = tk.Label(self.body, image=map_img, bg=BACKGROUND)
+        create_label(col, t("map"), style="heading").pack(anchor="w", pady=(0, 12))
+
+        map_img = load_image("map", size=(480, 300))
+        lbl = tk.Label(col, image=map_img, bg=c("BACKGROUND"))
         lbl.image = map_img
-        lbl.pack(padx=16, pady=12)
+        lbl.pack(pady=(0, 16))
 
-        card = tk.Frame(self.body, bg=CARD, padx=16, pady=14)
-        card.pack(fill=tk.X, padx=16, pady=8)
+        card = create_card(col, padx=18, pady=16)
+        card.pack(fill=tk.X, pady=8)
 
-        tk.Label(
+        create_label(
             card,
-            text=f"{loc['name']}\n{loc['city']}",
-            font=("Segoe UI", 12, "bold"),
-            fg=TEXT,
-            bg=CARD,
-            justify="left",
+            f"{loc['name']}\n{loc['city']}",
+            style="subheading",
+            bg=c("CARD"),
         ).pack(anchor="w")
 
-        tk.Label(
+        create_label(
             card,
-            text=f"Coordinates:\n{loc['latitude']}° N  {loc['longitude']}° E",
-            font=("Segoe UI", 10),
-            fg=TEXT_LIGHT,
-            bg=CARD,
-            justify="left",
-        ).pack(anchor="w", pady=(8, 0))
+            f"Coordinates:\n{loc['latitude']}° N  {loc['longitude']}° E",
+            style="small",
+            bg=c("CARD"),
+        ).pack(anchor="w", pady=(10, 0))
 
+        btn_col = button_row(col)
         styled_button(
-            self.body,
-            "Navigate",
+            btn_col,
+            t("navigate"),
             command=lambda: self._navigate(loc),
-        ).pack(fill=tk.X, padx=16, pady=20)
+            style="primary",
+            width=18,
+        ).pack(pady=12)
 
     def _navigate(self, loc):
-        from tkinter import messagebox
-
         messagebox.showinfo(
             "Navigate",
             f"Opening directions to {loc['name']} at "

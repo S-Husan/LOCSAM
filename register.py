@@ -3,81 +3,82 @@
 import tkinter as tk
 from tkinter import messagebox
 
-from config import BACKGROUND, TEXT
+from i18n import t
 from models import store
-from ui_utils import entry_field, get_entry_value, link_label, section_title, styled_button
+from ui_utils import (
+    back_button,
+    button_row,
+    c,
+    create_label,
+    entry_field,
+    form_card,
+    get_entry_value,
+    link_label,
+    styled_button,
+)
 
 
 class RegisterFrame(tk.Frame):
     def __init__(self, parent, controller):
-        super().__init__(parent, bg=BACKGROUND)
+        super().__init__(parent, bg=c("BACKGROUND"))
         self.controller = controller
+        self._build()
 
-        tk.Label(
-            self,
-            text="← Back",
-            fg="#6A00FF",
-            bg=BACKGROUND,
-            font=("Segoe UI", 10, "underline"),
-            cursor="hand2",
-        ).pack(anchor="w", padx=20, pady=(16, 0))
-        self.bind_back()
+    def on_show(self):
+        for w in self.winfo_children():
+            w.destroy()
+        self._build()
 
-        body = tk.Frame(self, bg=BACKGROUND)
-        body.pack(fill=tk.BOTH, expand=True, padx=24, pady=16)
+    def _build(self):
+        back_button(self, lambda: self.controller.show_frame("SplashFrame"))
 
-        section_title(body, "Create Account").pack(anchor="w", pady=(0, 4))
-        tk.Label(
-            body,
-            text="Sign up to explore Samarkand",
-            fg="#666",
-            bg=BACKGROUND,
-            font=("Segoe UI", 10),
-        ).pack(anchor="w", pady=(0, 20))
+        _, card = form_card(self)
 
-        tk.Label(body, text="Full Name", fg=TEXT, bg=BACKGROUND, font=("Segoe UI", 10)).pack(
-            anchor="w"
+        create_label(card, t("register_title"), style="title", bg=c("CARD")).pack(
+            anchor="w", pady=(0, 4)
         )
-        self.name_entry = entry_field(body, "Enter your full name")
-        self.name_entry.pack(fill=tk.X, pady=(4, 12), ipady=6)
-
-        tk.Label(body, text="Email Address", fg=TEXT, bg=BACKGROUND, font=("Segoe UI", 10)).pack(
-            anchor="w"
+        create_label(card, t("register_sub"), style="small", bg=c("CARD")).pack(
+            anchor="w", pady=(0, 20)
         )
-        self.email_entry = entry_field(body, "Enter your email")
-        self.email_entry.pack(fill=tk.X, pady=(4, 12), ipady=6)
 
-        tk.Label(body, text="Password", fg=TEXT, bg=BACKGROUND, font=("Segoe UI", 10)).pack(
-            anchor="w"
-        )
-        self.pass_entry = entry_field(body, "Minimum 8 characters", show="•")
-        self.pass_entry.pack(fill=tk.X, pady=(4, 12), ipady=6)
+        for label_key, attr, placeholder, show in [
+            ("full_name", "name_entry", "Enter your full name", None),
+            ("email", "email_entry", "Enter your email", None),
+            ("password", "pass_entry", "Minimum 8 characters", "•"),
+            ("confirm_password", "confirm_entry", "Repeat password", "•"),
+        ]:
+            create_label(card, t(label_key), style="body", bg=c("CARD")).pack(anchor="w")
+            entry = entry_field(card, placeholder, show=show)
+            entry.pack(fill=tk.X, pady=(4, 12), ipady=6)
+            setattr(self, attr, entry)
 
-        tk.Label(body, text="Confirm Password", fg=TEXT, bg=BACKGROUND, font=("Segoe UI", 10)).pack(
-            anchor="w"
-        )
-        self.confirm_entry = entry_field(body, "Repeat password", show="•")
-        self.confirm_entry.pack(fill=tk.X, pady=(4, 20), ipady=6)
-
-        styled_button(body, "Continue with Email", command=self._register).pack(
-            fill=tk.X, pady=(0, 12)
-        )
+        btn_col = button_row(card, max_width=400)
         styled_button(
-            body,
-            "Continue with Google",
+            btn_col,
+            t("continue_email"),
+            command=self._register,
+            style="primary",
+            full_width=True,
+        ).pack(fill=tk.X, pady=(0, 8))
+        styled_button(
+            btn_col,
+            t("continue_google"),
             command=lambda: messagebox.showinfo("LOCSAM", "Google sign-in is UI only."),
-            style="secondary",
+            style="outline",
+            full_width=True,
         ).pack(fill=tk.X)
 
-        row = tk.Frame(body, bg=BACKGROUND)
+        row = tk.Frame(card, bg=c("CARD"))
         row.pack(pady=16)
-        tk.Label(row, text="Already have an account? ", bg=BACKGROUND).pack(side=tk.LEFT)
-        link_label(row, "Login", lambda: controller.show_frame("LoginFrame")).pack(side=tk.LEFT)
-
-    def bind_back(self):
-        for w in self.winfo_children():
-            if isinstance(w, tk.Label) and w.cget("text") == "← Back":
-                w.bind("<Button-1>", lambda e: self.controller.show_frame("SplashFrame"))
+        create_label(row, t("already_have") + " ", style="muted", bg=c("CARD")).pack(
+            side=tk.LEFT
+        )
+        link_label(
+            row,
+            t("login"),
+            lambda: self.controller.show_frame("LoginFrame"),
+            bg=c("CARD"),
+        ).pack(side=tk.LEFT)
 
     def _register(self):
         name = get_entry_value(self.name_entry, "Enter your full name")
@@ -86,13 +87,13 @@ class RegisterFrame(tk.Frame):
         confirm = get_entry_value(self.confirm_entry, "Repeat password")
 
         if not name or not email or not password:
-            messagebox.showerror("Validation", "Please fill in all fields.")
+            messagebox.showerror("Validation", t("validation_fill"))
             return
         if len(password) < 8:
-            messagebox.showerror("Validation", "Password must be at least 8 characters.")
+            messagebox.showerror("Validation", t("validation_password_len"))
             return
         if password != confirm:
-            messagebox.showerror("Validation", "Passwords do not match.")
+            messagebox.showerror("Validation", t("validation_password_match"))
             return
 
         ok, msg = store.register_user(name, email, password)

@@ -147,7 +147,7 @@ class LocationFormDialog(tk.Toplevel):
         entry = tk.Entry(
             parent,
             font=("Segoe UI", 11),
-            bg=c("WHITE"),
+            bg=c("INPUT_BG"),
             fg=c("TEXT"),
             relief=tk.FLAT,
             highlightthickness=1,
@@ -166,7 +166,7 @@ class LocationFormDialog(tk.Toplevel):
             parent,
             height=4,
             font=("Segoe UI", 11),
-            bg=c("WHITE"),
+            bg=c("INPUT_BG"),
             fg=c("TEXT"),
             relief=tk.FLAT,
             highlightthickness=1,

@@ -2,48 +2,64 @@
 
 import tkinter as tk
 
-from config import BACKGROUND, CARD, PRIMARY, TEXT, TEXT_LIGHT
+from i18n import t
 from models import store
-from ui_utils import bottom_nav, entry_field, get_entry_value, load_image, star_rating
+from theme import CONTENT_MAX_WIDTH, PAD_LG, PAD_MD
+from ui_utils import (
+    bottom_nav,
+    c,
+    create_card,
+    create_label,
+    entry_field,
+    get_entry_value,
+    load_image,
+    page_header,
+    star_rating,
+    styled_button,
+)
 
 
 class SearchFrame(tk.Frame):
     def __init__(self, parent, controller):
-        super().__init__(parent, bg=BACKGROUND)
+        super().__init__(parent, bg=c("BACKGROUND"))
         self.controller = controller
+        self._build_shell()
 
-        header = tk.Frame(self, bg=BACKGROUND, padx=16, pady=12)
-        header.pack(fill=tk.X)
-        tk.Label(
-            header,
-            text="Search",
-            font=("Segoe UI", 20, "bold"),
-            fg=TEXT,
-            bg=BACKGROUND,
-        ).pack(anchor="w")
+    def _build_shell(self):
+        page_header(self, t("search"))
 
-        search_row = tk.Frame(self, bg=BACKGROUND, padx=16)
-        search_row.pack(fill=tk.X)
-        self.search_entry = entry_field(search_row, "Search by name, category, rating...")
-        self.search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=6)
-        tk.Button(
+        search_wrap = tk.Frame(self, bg=c("BACKGROUND"))
+        search_wrap.pack(fill=tk.X, padx=PAD_LG, pady=(0, PAD_MD))
+        search_row = tk.Frame(search_wrap, bg=c("BACKGROUND"))
+        search_row.pack(anchor="center")
+        self.search_entry = entry_field(
+            search_row, "Search by name, category, rating...", width=44
+        )
+        self.search_entry.pack(side=tk.LEFT, ipady=6)
+        styled_button(
             search_row,
-            text="Search",
-            bg=PRIMARY,
-            fg="white",
-            relief=tk.FLAT,
+            t("search"),
             command=self._search,
-            padx=12,
-        ).pack(side=tk.LEFT, padx=(8, 0))
+            style="primary",
+            width=10,
+        ).pack(side=tk.LEFT, padx=(10, 0))
 
         from ui_utils import scrollable_frame
 
-        scroll_container, _, self.results = scrollable_frame(self)
-        scroll_container.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+        content = tk.Frame(self, bg=c("BACKGROUND"))
+        content.pack(fill=tk.BOTH, expand=True)
+        scroll_container, _, self.results = scrollable_frame(content)
+        scroll_container.pack(fill=tk.BOTH, expand=True, padx=PAD_LG, pady=4)
 
         bottom_nav(
             self,
-            [("🏠", "Home"), ("🔍", "Search"), ("🎫", "Tickets"), ("❤", "Saved"), ("👤", "Profile")],
+            [
+                ("🏠", t("home")),
+                ("🔍", t("search")),
+                ("🎫", t("tickets")),
+                ("❤", t("saved")),
+                ("👤", t("profile")),
+            ],
             1,
             self._nav_select,
         )
@@ -57,7 +73,7 @@ class SearchFrame(tk.Frame):
         if q:
             self.search_entry.delete(0, tk.END)
             self.search_entry.insert(0, q)
-            self.search_entry.config(fg=TEXT)
+            self.search_entry.config(fg=c("TEXT"))
         self._search()
 
     def _search(self):
@@ -67,54 +83,55 @@ class SearchFrame(tk.Frame):
         q = get_entry_value(self.search_entry, "Search by name, category, rating...")
         locations = store.get_locations("All", q)
 
+        list_wrap = tk.Frame(self.results, bg=c("BACKGROUND"))
+        list_wrap.pack(anchor="center", fill=tk.X)
+
         if not locations:
-            tk.Label(
-                self.results,
-                text="No results found.",
-                bg=BACKGROUND,
-                fg=TEXT_LIGHT,
-                font=("Segoe UI", 11),
+            create_label(
+                list_wrap,
+                "No results found.",
+                style="body",
             ).pack(pady=40)
             return
 
         for loc in locations:
-            row = tk.Frame(
-                self.results,
-                bg=CARD,
-                highlightbackground="#E0E0E0",
-                highlightthickness=1,
-                cursor="hand2",
-            )
-            row.pack(fill=tk.X, padx=8, pady=6)
+            row = create_card(list_wrap, padx=12, pady=10)
+            row.pack(fill=tk.X, padx=4, pady=6)
+            row.config(cursor="hand2")
 
-            img = load_image(loc["image"], size=(80, 60))
-            img_lbl = tk.Label(row, image=img, bg=CARD)
+            inner = tk.Frame(row, bg=c("CARD"))
+            inner.pack(fill=tk.X)
+
+            img = load_image(loc["image"], size=(96, 72))
+            img_lbl = tk.Label(inner, image=img, bg=c("CARD"))
             img_lbl.image = img
-            img_lbl.pack(side=tk.LEFT, padx=8, pady=8)
+            img_lbl.pack(side=tk.LEFT, padx=(0, 12))
 
-            info = tk.Frame(row, bg=CARD)
-            info.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=8)
+            info = tk.Frame(inner, bg=c("CARD"))
+            info.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-            tk.Label(
+            create_label(info, loc["name"], style="subheading", bg=c("CARD")).pack(
+                fill=tk.X, anchor="w"
+            )
+            star_rating(info, loc["rating"], c("CARD")).pack(anchor="w", pady=(2, 0))
+            create_label(
                 info,
-                text=loc["name"],
-                font=("Segoe UI", 12, "bold"),
-                fg=TEXT,
-                bg=CARD,
-                anchor="w",
-            ).pack(fill=tk.X)
-            star_rating(info, loc["rating"], CARD).pack(anchor="w")
-            tk.Label(
-                info,
-                text=f"{loc['reviews']} reviews",
-                font=("Segoe UI", 9),
-                fg=TEXT_LIGHT,
-                bg=CARD,
+                f"{loc['reviews']} {t('reviews')} · ${loc['price']}",
+                style="tiny",
+                bg=c("CARD"),
             ).pack(anchor="w")
 
             fav = "❤" if store.is_favorite(loc["id"]) else "♡"
-            fav_btn = tk.Label(row, text=fav, font=("Segoe UI", 16), bg=CARD, cursor="hand2")
-            fav_btn.pack(side=tk.RIGHT, padx=12)
+            fav_btn = tk.Label(
+                inner,
+                text=fav,
+                font=("Segoe UI", 18),
+                bg=c("CARD"),
+                fg=c("PRIMARY"),
+                cursor="hand2",
+                padx=12,
+            )
+            fav_btn.pack(side=tk.RIGHT)
 
             def open_detail(_=None, lid=loc["id"]):
                 self.controller.selected_location_id = lid
@@ -124,6 +141,6 @@ class SearchFrame(tk.Frame):
                 store.toggle_favorite(lid)
                 self._search()
 
-            for w in (row, img_lbl, info):
+            for w in (row, inner, img_lbl, info):
                 w.bind("<Button-1>", open_detail)
             fav_btn.bind("<Button-1>", toggle_fav)

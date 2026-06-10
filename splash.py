@@ -2,69 +2,96 @@
 
 import tkinter as tk
 
-from config import BACKGROUND, PRIMARY, TEXT, WHITE
-from ui_utils import link_label, load_image, styled_button
+from i18n import t
+from theme import HERO_HEIGHT
+from ui_utils import (
+    button_row,
+    c,
+    centered_column,
+    create_label,
+    load_image,
+    styled_button,
+)
 
 
 class SplashFrame(tk.Frame):
     def __init__(self, parent, controller):
-        super().__init__(parent, bg=BACKGROUND)
+        super().__init__(parent, bg=c("BACKGROUND"))
         self.controller = controller
+        self._build()
 
-        hero = tk.Frame(self, bg=PRIMARY, height=420)
+    def on_show(self):
+        for w in self.winfo_children():
+            w.destroy()
+        self._build()
+
+    def _build(self):
+        hero = tk.Frame(self, bg=c("OVERLAY"), height=HERO_HEIGHT)
         hero.pack(fill=tk.X)
         hero.pack_propagate(False)
 
         try:
-            bg_img = load_image("splash_bg", size=(420, 420))
-            lbl_img = tk.Label(hero, image=bg_img, bg=PRIMARY)
+            bg_img = load_image("splash_bg", size=(1200, HERO_HEIGHT))
+            lbl_img = tk.Label(hero, image=bg_img, bg=c("OVERLAY"))
             lbl_img.image = bg_img
-            lbl_img.place(x=0, y=0, relwidth=1, relheight=1)
+            lbl_img.place(relx=0.5, rely=0.5, anchor="center")
         except Exception:
             pass
 
-        overlay = tk.Frame(hero, bg=PRIMARY)
+        overlay = tk.Frame(hero, bg=c("OVERLAY"))
         overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-        tk.Label(
+        create_label(
             overlay,
-            text="LOCSAM",
+            "LOCSAM",
+            style="title",
+            bg=c("OVERLAY"),
+            fg=c("HEADER_TEXT"),
             font=("Segoe UI", 42, "bold"),
-            fg=WHITE,
-            bg=PRIMARY,
-        ).pack(pady=(120, 8))
+        ).pack(pady=(100, 8))
 
-        tk.Label(
+        create_label(
             overlay,
-            text="Join over 10,000 travelers around the world\nand enjoy your travel.",
-            font=("Segoe UI", 12),
-            fg=WHITE,
-            bg=PRIMARY,
+            t("splash_subtitle"),
+            style="inverse",
+            bg=c("OVERLAY"),
             justify="center",
         ).pack(pady=8)
 
-        body = tk.Frame(self, bg=BACKGROUND)
-        body.pack(fill=tk.BOTH, expand=True, padx=24, pady=24)
+        body = tk.Frame(self, bg=c("BACKGROUND"))
+        body.pack(fill=tk.BOTH, expand=True, pady=32)
+
+        col = centered_column(body)
+        btn_col = tk.Frame(col, bg=c("BACKGROUND"))
+        btn_col.pack()
 
         styled_button(
-            body,
-            "Create Account",
-            command=lambda: controller.show_frame("RegisterFrame"),
-        ).pack(fill=tk.X, pady=(40, 16))
+            btn_col,
+            t("create_account"),
+            command=lambda: self.controller.show_frame("RegisterFrame"),
+            style="primary",
+            full_width=True,
+        ).pack(fill=tk.X, ipadx=40, ipady=2)
 
-        row = tk.Frame(body, bg=BACKGROUND)
-        row.pack()
-        tk.Label(row, text="Already have an account? ", fg=TEXT, bg=BACKGROUND).pack(
+        row = tk.Frame(col, bg=c("BACKGROUND"))
+        row.pack(pady=16)
+        create_label(row, t("already_have") + " ", style="muted", bg=c("BACKGROUND")).pack(
             side=tk.LEFT
         )
-        link_label(row, "Login", lambda: controller.show_frame("LoginFrame")).pack(
-            side=tk.LEFT
-        )
+        from ui_utils import link_label
 
-        admin_row = tk.Frame(body, bg=BACKGROUND)
-        admin_row.pack(pady=20)
         link_label(
+            row,
+            t("login"),
+            lambda: self.controller.show_frame("LoginFrame"),
+            bg=c("BACKGROUND"),
+        ).pack(side=tk.LEFT)
+
+        admin_row = button_row(col)
+        styled_button(
             admin_row,
-            "Admin Login",
-            lambda: controller.show_frame("AdminLoginFrame"),
+            t("admin_login"),
+            command=lambda: self.controller.show_frame("AdminLoginFrame"),
+            style="outline",
+            width=22,
         ).pack()
