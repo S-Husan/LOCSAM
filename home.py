@@ -11,7 +11,6 @@ from ui_utils import (
     c,
     create_card,
     create_label,
-    desktop_card_width,
     desktop_columns,
     entry_field,
     get_entry_value,
@@ -20,6 +19,12 @@ from ui_utils import (
     star_rating,
     styled_button,
 )
+
+# Gap between cards: padx/pady are per side (13+13 ≈ 26px horizontal, 10+10 ≈ 20px vertical)
+CARD_PADX = 13
+CARD_PADY = 10
+CARD_MIN_WIDTH = 270
+CARD_MAX_WIDTH = 340
 
 
 class HomeFrame(tk.Frame):
@@ -161,13 +166,15 @@ class HomeFrame(tk.Frame):
             w = CONTENT_MAX_WIDTH
         w = min(w, CONTENT_MAX_WIDTH)
         cols = desktop_columns(w)
-        card_w = desktop_card_width(w)
+        usable = w - 32
+        h_gaps = CARD_PADX * 2 * max(cols - 1, 0)
+        card_w = max(CARD_MIN_WIDTH, min(CARD_MAX_WIDTH, (usable - h_gaps) // cols))
 
         grid = tk.Frame(self.list_frame, bg=c("BACKGROUND"))
-        grid.pack(fill=tk.X, padx=4, pady=4)
+        grid.pack(anchor="center", pady=8)
 
         for col in range(cols):
-            grid.grid_columnconfigure(col, weight=1, uniform="cards")
+            grid.grid_columnconfigure(col, weight=0)
 
         locations = store.get_locations(self.active_filter, self._current_search())
 
@@ -182,7 +189,13 @@ class HomeFrame(tk.Frame):
 
         for i, loc in enumerate(locations):
             cell = tk.Frame(grid, bg=c("BACKGROUND"))
-            cell.grid(row=i // cols, column=i % cols, padx=10, pady=10, sticky="n")
+            cell.grid(
+                row=i // cols,
+                column=i % cols,
+                padx=CARD_PADX,
+                pady=CARD_PADY,
+                sticky="n",
+            )
             self._build_card(cell, loc, card_w)
 
         refresh_scroll_region(self.list_canvas)

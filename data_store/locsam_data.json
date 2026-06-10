@@ -20,6 +20,13 @@
       "email": "2",
       "password": "12345678",
       "created_at": "2026-06-10"
+    },
+    {
+      "id": 4,
+      "full_name": "Sayfiyev Husan",
+      "email": "Sayfiyevhusan77@gmail.com",
+      "password": "12345678",
+      "created_at": "2026-06-10"
     }
   ],
   "admins": [
@@ -272,12 +279,12 @@
     }
   ],
   "settings": {
-    "language": "en",
+    "language": "uz",
     "dark_mode": true,
-    "remembered_user_id": 2
+    "remembered_user_id": null
   },
   "_next_ids": {
-    "users": 4,
+    "users": 5,
     "locations": 7,
     "tickets": 5,
     "contact": 2,
