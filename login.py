@@ -83,8 +83,11 @@ class LoginFrame(tk.Frame):
         if not email or not password:
             messagebox.showerror("Validation", "Please enter email and password.")
             return
-        ok, msg = store.login_user(email, password)
+        remember = self.remember_var.get()
+        ok, msg = store.login_user(email, password, remember=remember)
         if ok:
+            if not remember:
+                store.clear_remember_user()
             self.controller.show_frame("HomeFrame")
         else:
             messagebox.showerror("Login Failed", msg)

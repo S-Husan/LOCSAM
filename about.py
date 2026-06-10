@@ -39,7 +39,7 @@ class AboutFrame(tk.Frame):
             "Frontend Developer",
             "Backend Developer",
             "UI/UX Designer",
-            "Project Manager",
+            "Proje ct Manager",
         ]:
             tk.Label(
                 inner,
@@ -67,3 +67,4 @@ class AboutFrame(tk.Frame):
             tk.Label(row, text=value, font=("Segoe UI", 10), fg=TEXT_LIGHT, bg=CARD, anchor="w").pack(
                 side=tk.LEFT
             )
+  

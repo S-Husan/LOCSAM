@@ -6,25 +6,23 @@ from tkinter import ttk
 
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 
-from config import (
-    ACCENT,
-    BACKGROUND,
-    BORDER,
-    CARD,
-    DANGER,
-    PRIMARY,
-    SECONDARY,
-    TEXT,
-    TEXT_LIGHT,
-    WHITE,
-)
+from config import APP_WIDTH
+from theme import theme_manager
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 _image_cache = {}
 
 
+def clear_image_cache():
+    global _image_cache
+    _image_cache = {}
+
+
+def c(key):
+    return theme_manager.get(key)
+
+
 def ensure_assets():
-    """Generate placeholder images if assets folder is empty."""
     os.makedirs(ASSETS_DIR, exist_ok=True)
     colors = {
         "registan": ("#1E3A8A", "#F59E0B"),
@@ -73,7 +71,6 @@ def _create_gradient_image(path, w, h, c1, c2, label=""):
 
 
 def load_image(name, size=(360, 200)):
-    """Load and cache a Pillow image as PhotoImage."""
     key = (name, size)
     if key in _image_cache:
         return _image_cache[key]
@@ -83,7 +80,6 @@ def load_image(name, size=(360, 200)):
     if not os.path.exists(path):
         path = os.path.join(ASSETS_DIR, f"{name}.png")
     if not os.path.exists(path):
-        ensure_assets()
         path = os.path.join(ASSETS_DIR, "registan.png")
     img = Image.open(path).convert("RGB")
     img = img.resize(size, Image.Resampling.LANCZOS)
@@ -92,14 +88,32 @@ def load_image(name, size=(360, 200)):
     return photo
 
 
+def desktop_card_width(parent_width=None):
+    """Compute card image width for responsive desktop grid."""
+    w = parent_width or APP_WIDTH
+    if w >= 1100:
+        return 340
+    if w >= 800:
+        return 360
+    return min(w - 48, 420)
+
+
+def desktop_columns(parent_width=None):
+    w = parent_width or APP_WIDTH
+    if w >= 1100:
+        return 3
+    if w >= 800:
+        return 2
+    return 1
+
+
 def styled_button(parent, text, command=None, style="primary", width=None):
-    """Create a styled tk Button."""
     styles = {
-        "primary": {"bg": PRIMARY, "fg": WHITE, "activebackground": SECONDARY},
-        "secondary": {"bg": CARD, "fg": TEXT, "activebackground": BORDER},
-        "accent": {"bg": ACCENT, "fg": TEXT, "activebackground": "#E6AC00"},
-        "outline": {"bg": WHITE, "fg": PRIMARY, "activebackground": CARD},
-        "danger": {"bg": DANGER, "fg": WHITE, "activebackground": "#C82333"},
+        "primary": {"bg": c("PRIMARY"), "fg": "#FFFFFF", "activebackground": c("SECONDARY")},
+        "secondary": {"bg": c("CARD"), "fg": c("TEXT"), "activebackground": c("BORDER")},
+        "accent": {"bg": c("ACCENT"), "fg": c("TEXT"), "activebackground": "#E6AC00"},
+        "outline": {"bg": c("WHITE"), "fg": c("PRIMARY"), "activebackground": c("CARD")},
+        "danger": {"bg": "#DC3545", "fg": "#FFFFFF", "activebackground": "#C82333"},
     }
     s = styles.get(style, styles["primary"])
     kw = dict(
@@ -118,17 +132,16 @@ def styled_button(parent, text, command=None, style="primary", width=None):
     )
     if width:
         kw["width"] = width
-    btn = tk.Button(parent, **kw)
-    return btn
+    return tk.Button(parent, **kw)
 
 
-def link_label(parent, text, command):
-    """Clickable link-style label."""
+def link_label(parent, text, command, bg=None):
+    bg = bg or c("BACKGROUND")
     lbl = tk.Label(
         parent,
         text=text,
-        fg=PRIMARY,
-        bg=BACKGROUND,
+        fg=c("PRIMARY"),
+        bg=bg,
         font=("Segoe UI", 10, "underline"),
         cursor="hand2",
     )
@@ -136,61 +149,59 @@ def link_label(parent, text, command):
     return lbl
 
 
-def section_title(parent, text, bg=BACKGROUND):
+def section_title(parent, text, bg=None):
+    bg = bg or c("BACKGROUND")
     return tk.Label(
         parent,
         text=text,
         font=("Segoe UI", 18, "bold"),
-        fg=TEXT,
+        fg=c("TEXT"),
         bg=bg,
         anchor="w",
     )
 
 
-def subtitle_label(parent, text, bg=BACKGROUND):
+def subtitle_label(parent, text, bg=None, wrap=None):
+    bg = bg or c("BACKGROUND")
+    wrap = wrap or min(APP_WIDTH - 80, 600)
     return tk.Label(
         parent,
         text=text,
         font=("Segoe UI", 10),
-        fg=TEXT_LIGHT,
+        fg=c("TEXT_LIGHT"),
         bg=bg,
         anchor="w",
-        wraplength=360,
+        wraplength=wrap,
         justify="left",
     )
-
-
-def card_frame(parent, bg=CARD, padx=12, pady=12):
-    f = tk.Frame(parent, bg=bg, highlightbackground=BORDER, highlightthickness=1)
-    return f
 
 
 def entry_field(parent, placeholder="", show=None, width=32):
     entry = tk.Entry(
         parent,
         font=("Segoe UI", 11),
-        fg=TEXT,
-        bg=WHITE,
+        fg=c("TEXT"),
+        bg=c("WHITE"),
         relief=tk.FLAT,
         highlightthickness=1,
-        highlightbackground=BORDER,
-        highlightcolor=PRIMARY,
+        highlightbackground=c("BORDER"),
+        highlightcolor=c("PRIMARY"),
         width=width,
         show=show,
     )
     if placeholder:
         entry.insert(0, placeholder)
-        entry.config(fg=TEXT_LIGHT)
+        entry.config(fg=c("TEXT_LIGHT"))
 
         def on_focus_in(_):
             if entry.get() == placeholder:
                 entry.delete(0, tk.END)
-                entry.config(fg=TEXT)
+                entry.config(fg=c("TEXT"))
 
         def on_focus_out(_):
             if not entry.get():
                 entry.insert(0, placeholder)
-                entry.config(fg=TEXT_LIGHT)
+                entry.config(fg=c("TEXT_LIGHT"))
 
         entry.bind("<FocusIn>", on_focus_in)
         entry.bind("<FocusOut>", on_focus_out)
@@ -204,7 +215,8 @@ def get_entry_value(entry, placeholder=""):
     return val
 
 
-def star_rating(parent, rating, bg=CARD):
+def star_rating(parent, rating, bg=None):
+    bg = bg or c("CARD")
     full = int(rating)
     half = 1 if rating - full >= 0.3 else 0
     empty = 5 - full - half
@@ -213,24 +225,23 @@ def star_rating(parent, rating, bg=CARD):
         parent,
         text=f"{stars}  {rating}",
         font=("Segoe UI", 10),
-        fg=ACCENT,
+        fg=c("ACCENT"),
         bg=bg,
     )
 
 
 def bottom_nav(parent, items, active_index, on_select):
-    """Bottom navigation bar: list of (icon_char, label)."""
-    nav = tk.Frame(parent, bg=WHITE, highlightbackground=BORDER, highlightthickness=1)
+    nav = tk.Frame(parent, bg=c("WHITE"), highlightbackground=c("BORDER"), highlightthickness=1)
     nav.pack(side=tk.BOTTOM, fill=tk.X)
 
     for i, (icon, label) in enumerate(items):
-        color = PRIMARY if i == active_index else TEXT_LIGHT
-        btn_frame = tk.Frame(nav, bg=WHITE, cursor="hand2")
+        color = c("PRIMARY") if i == active_index else c("TEXT_LIGHT")
+        btn_frame = tk.Frame(nav, bg=c("WHITE"), cursor="hand2")
         btn_frame.pack(side=tk.LEFT, expand=True, fill=tk.BOTH, pady=6)
 
-        icon_lbl = tk.Label(btn_frame, text=icon, font=("Segoe UI", 14), fg=color, bg=WHITE)
+        icon_lbl = tk.Label(btn_frame, text=icon, font=("Segoe UI", 14), fg=color, bg=c("WHITE"))
         icon_lbl.pack()
-        text_lbl = tk.Label(btn_frame, text=label, font=("Segoe UI", 8), fg=color, bg=WHITE)
+        text_lbl = tk.Label(btn_frame, text=label, font=("Segoe UI", 8), fg=color, bg=c("WHITE"))
         text_lbl.pack()
 
         def bind_click(idx, frame, il, tl):
@@ -244,16 +255,13 @@ def bottom_nav(parent, items, active_index, on_select):
     return nav
 
 
-def scrollable_frame(parent, bg=BACKGROUND):
-    """Return (canvas, inner_frame) for scrollable content."""
+def scrollable_frame(parent, bg=None):
+    bg = bg or c("BACKGROUND")
     container = tk.Frame(parent, bg=bg)
     canvas = tk.Canvas(container, bg=bg, highlightthickness=0)
     scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
     inner = tk.Frame(canvas, bg=bg)
-    inner.bind(
-        "<Configure>",
-        lambda e: canvas.configure(scrollregion=canvas.bbox("all")),
-    )
+    inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
     win = canvas.create_window((0, 0), window=inner, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
 
@@ -272,23 +280,91 @@ def scrollable_frame(parent, bg=BACKGROUND):
     return container, canvas, inner
 
 
-def show_toast(root, message, is_error=False):
-    toast = tk.Toplevel(root)
-    toast.overrideredirect(True)
-    toast.attributes("-topmost", True)
-    color = DANGER if is_error else PRIMARY
-    lbl = tk.Label(
-        toast,
-        text=message,
-        bg=color,
-        fg=WHITE,
-        font=("Segoe UI", 10),
-        padx=16,
-        pady=10,
-    )
-    lbl.pack()
-    toast.update_idletasks()
-    x = root.winfo_x() + (root.winfo_width() - toast.winfo_width()) // 2
-    y = root.winfo_y() + 60
-    toast.geometry(f"+{x}+{y}")
-    toast.after(2500, toast.destroy)
+def apply_theme_to_widget(widget, depth=0):
+    """Recursively apply current theme colors to tk widgets."""
+    if depth > 25:
+        return
+    try:
+        cls = widget.winfo_class()
+        if cls in ("Frame", "Toplevel"):
+            try:
+                widget.configure(bg=c("BACKGROUND"))
+            except tk.TclError:
+                pass
+        elif cls == "Label":
+            try:
+                cur_bg = widget.cget("bg")
+                if cur_bg in ("#6A00FF", "#8E2EFF", theme_manager.palette()["PRIMARY"]):
+                    pass
+                elif cur_bg in ("#FFFFFF", "#F8F8F8", "#252540", "#2D2D44"):
+                    widget.configure(bg=c("CARD"), fg=c("TEXT"))
+                else:
+                    widget.configure(bg=c("BACKGROUND"), fg=c("TEXT"))
+            except tk.TclError:
+                pass
+        elif cls == "Button":
+            try:
+                widget.configure(bg=c("PRIMARY"), fg="#FFFFFF")
+            except tk.TclError:
+                pass
+        elif cls == "Entry":
+            try:
+                widget.configure(bg=c("WHITE"), fg=c("TEXT"))
+            except tk.TclError:
+                pass
+        elif cls == "Text":
+            try:
+                widget.configure(bg=c("WHITE"), fg=c("TEXT"))
+            except tk.TclError:
+                pass
+        elif cls == "Checkbutton":
+            try:
+                widget.configure(bg=c("BACKGROUND"), fg=c("TEXT"))
+            except tk.TclError:
+                pass
+    except tk.TclError:
+        pass
+    for child in widget.winfo_children():
+        apply_theme_to_widget(child, depth + 1)
+
+
+def show_language_dialog(parent, on_change):
+    from i18n import t
+
+    dlg = tk.Toplevel(parent)
+    dlg.title(t("language_pick"))
+    dlg.geometry("320x220")
+    dlg.configure(bg=c("BACKGROUND"))
+    dlg.transient(parent)
+    dlg.grab_set()
+
+    tk.Label(
+        dlg,
+        text=t("language_pick"),
+        font=("Segoe UI", 14, "bold"),
+        bg=c("BACKGROUND"),
+        fg=c("TEXT"),
+    ).pack(pady=16)
+
+    from models import store
+
+    for code, label_key in [("uz", "lang_uz"), ("en", "lang_en"), ("ru", "lang_ru")]:
+        tk.Button(
+            dlg,
+            text=t(label_key),
+            width=24,
+            command=lambda lang=code: _pick(lang, dlg, on_change),
+            bg=c("PRIMARY") if store.settings.get("language") == code else c("CARD"),
+            fg=c("TEXT"),
+            relief=tk.FLAT,
+            pady=8,
+        ).pack(pady=4)
+
+
+def _pick(lang, dlg, on_change):
+    from models import store
+
+    store.set_language(lang)
+    dlg.destroy()
+    if on_change:
+        on_change()

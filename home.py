@@ -1,89 +1,106 @@
-"""Home page — tourist locations listing."""
+"""Home page — tourist locations listing (desktop responsive grid)."""
 
 import tkinter as tk
 
-from config import BACKGROUND, CARD, PRIMARY, TEXT, TEXT_LIGHT, WHITE
 from data import FILTER_TABS
+from i18n import t
 from models import store
-from ui_utils import bottom_nav, entry_field, get_entry_value, load_image, star_rating
+from theme import theme_manager
+from ui_utils import (
+    bottom_nav,
+    c,
+    desktop_card_width,
+    desktop_columns,
+    entry_field,
+    get_entry_value,
+    load_image,
+    star_rating,
+)
 
 
 class HomeFrame(tk.Frame):
     def __init__(self, parent, controller):
-        super().__init__(parent, bg=BACKGROUND)
+        super().__init__(parent, bg=c("BACKGROUND"))
         self.controller = controller
         self.active_filter = "All"
         self.filter_buttons = {}
 
-        header = tk.Frame(self, bg=WHITE, padx=16, pady=12)
+        header = tk.Frame(self, bg=c("WHITE"), padx=20, pady=14)
         header.pack(fill=tk.X)
 
         tk.Label(
             header,
             text="LOCSAM",
-            font=("Segoe UI", 22, "bold"),
-            fg=PRIMARY,
-            bg=WHITE,
+            font=("Segoe UI", 24, "bold"),
+            fg=c("PRIMARY"),
+            bg=c("WHITE"),
         ).pack(side=tk.LEFT)
 
-        icons = tk.Frame(header, bg=WHITE)
+        icons = tk.Frame(header, bg=c("WHITE"))
         icons.pack(side=tk.RIGHT)
         for sym, frame_name in [("🔍", "SearchFrame"), ("👤", "ProfileFrame")]:
             lbl = tk.Label(
                 icons,
                 text=sym,
                 font=("Segoe UI", 16),
-                bg=WHITE,
+                bg=c("WHITE"),
                 cursor="hand2",
             )
-            lbl.pack(side=tk.LEFT, padx=6)
-            lbl.bind(
-                "<Button-1>",
-                lambda e, f=frame_name: controller.show_frame(f),
-            )
+            lbl.pack(side=tk.LEFT, padx=8)
+            lbl.bind("<Button-1>", lambda e, f=frame_name: controller.show_frame(f))
 
-        search_row = tk.Frame(self, bg=BACKGROUND, padx=16)
-        search_row.pack(fill=tk.X, pady=(0, 8))
-        self.search_entry = entry_field(search_row, "Enter place name...")
+        search_row = tk.Frame(self, bg=c("BACKGROUND"), padx=20)
+        search_row.pack(fill=tk.X, pady=(0, 10))
+        self.search_entry = entry_field(search_row, t("search_placeholder"))
         self.search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=6)
         tk.Button(
             search_row,
-            text="Go",
-            bg=PRIMARY,
-            fg=WHITE,
+            text=t("go"),
+            bg=c("PRIMARY"),
+            fg="#FFFFFF",
             relief=tk.FLAT,
             command=self._apply_search,
-            padx=12,
-        ).pack(side=tk.LEFT, padx=(8, 0))
+            padx=14,
+        ).pack(side=tk.LEFT, padx=(10, 0))
 
-        tabs = tk.Frame(self, bg=BACKGROUND, padx=12)
+        tabs = tk.Frame(self, bg=c("BACKGROUND"), padx=16)
         tabs.pack(fill=tk.X)
         for tab in FILTER_TABS:
             btn = tk.Label(
                 tabs,
                 text=tab,
                 font=("Segoe UI", 9, "bold"),
-                padx=10,
-                pady=6,
+                padx=12,
+                pady=7,
                 cursor="hand2",
             )
-            btn.pack(side=tk.LEFT, padx=2)
-            btn.bind("<Button-1>", lambda e, t=tab: self._set_filter(t))
+            btn.pack(side=tk.LEFT, padx=3)
+            btn.bind("<Button-1>", lambda e, tb=tab: self._set_filter(tb))
             self.filter_buttons[tab] = btn
 
         from ui_utils import scrollable_frame
 
         scroll_container, _, self.list_frame = scrollable_frame(self)
-        scroll_container.pack(fill=tk.BOTH, expand=True, padx=8, pady=4)
+        scroll_container.pack(fill=tk.BOTH, expand=True, padx=12, pady=6)
+
+        self.bind("<Configure>", self._on_resize)
 
         bottom_nav(
             self,
-            [("🏠", "Home"), ("🔍", "Search"), ("🎫", "Tickets"), ("❤", "Saved"), ("👤", "Profile")],
+            [
+                ("🏠", t("home")),
+                ("🔍", t("search")),
+                ("🎫", t("tickets")),
+                ("❤", t("saved")),
+                ("👤", t("profile")),
+            ],
             0,
             self._nav_select,
         )
 
-        self._refresh_list()
+    def _on_resize(self, event):
+        if event.widget == self and event.width > 100:
+            self._refresh_list(event.width)
 
     def _nav_select(self, idx):
         frames = ["HomeFrame", "SearchFrame", "MyTicketsFrame", "FavoritesFrame", "ProfileFrame"]
@@ -91,59 +108,65 @@ class HomeFrame(tk.Frame):
 
     def _set_filter(self, tab):
         self.active_filter = tab
-        for name, btn in self.filter_buttons.items():
-            if name == tab:
-                btn.config(bg=PRIMARY, fg=WHITE)
-            else:
-                btn.config(bg=CARD, fg=TEXT)
         self._refresh_list()
 
     def _apply_search(self):
-        q = get_entry_value(self.search_entry, "Enter place name...")
+        q = get_entry_value(self.search_entry, t("search_placeholder"))
         self.controller.search_query = q
         self.controller.show_frame("SearchFrame")
 
     def on_show(self):
         self._refresh_list()
 
-    def _refresh_list(self):
+    def _refresh_list(self, width=None):
         for w in self.list_frame.winfo_children():
             w.destroy()
 
         for name, btn in self.filter_buttons.items():
             if name == self.active_filter:
-                btn.config(bg=PRIMARY, fg=WHITE)
+                btn.config(bg=c("PRIMARY"), fg="#FFFFFF")
             else:
-                btn.config(bg=CARD, fg=TEXT)
+                btn.config(bg=c("CARD"), fg=c("TEXT"))
+
+        w = width or self.winfo_width()
+        cols = desktop_columns(w)
+        card_w = desktop_card_width(w)
+
+        grid = tk.Frame(self.list_frame, bg=c("BACKGROUND"))
+        grid.pack(fill=tk.X, padx=4, pady=4)
 
         locations = store.get_locations(self.active_filter)
-        for loc in locations:
-            self._build_card(loc)
+        for i, loc in enumerate(locations):
+            cell = tk.Frame(grid, bg=c("BACKGROUND"))
+            cell.grid(row=i // cols, column=i % cols, padx=8, pady=8, sticky="nsew")
+            grid.grid_columnconfigure(i % cols, weight=1)
+            self._build_card(cell, loc, card_w)
 
-    def _build_card(self, loc):
+    def _build_card(self, parent, loc, card_w):
         card = tk.Frame(
-            self.list_frame,
-            bg=CARD,
-            highlightbackground="#E0E0E0",
+            parent,
+            bg=c("CARD"),
+            highlightbackground=c("BORDER"),
             highlightthickness=1,
             cursor="hand2",
         )
-        card.pack(fill=tk.X, padx=8, pady=8)
+        card.pack(fill=tk.BOTH, expand=True)
 
-        img = load_image(loc["image"], size=(380, 160))
-        img_lbl = tk.Label(card, image=img, bg=CARD)
+        img_h = int(card_w * 0.42)
+        img = load_image(loc["image"], size=(card_w, img_h))
+        img_lbl = tk.Label(card, image=img, bg=c("CARD"))
         img_lbl.image = img
         img_lbl.pack(fill=tk.X)
 
-        info = tk.Frame(card, bg=CARD, padx=12, pady=10)
+        info = tk.Frame(card, bg=c("CARD"), padx=14, pady=12)
         info.pack(fill=tk.X)
 
         tk.Label(
             info,
             text=loc["name"],
             font=("Segoe UI", 14, "bold"),
-            fg=TEXT,
-            bg=CARD,
+            fg=c("TEXT"),
+            bg=c("CARD"),
             anchor="w",
         ).pack(fill=tk.X)
 
@@ -151,24 +174,24 @@ class HomeFrame(tk.Frame):
             info,
             text=loc["city"],
             font=("Segoe UI", 9),
-            fg=TEXT_LIGHT,
-            bg=CARD,
+            fg=c("TEXT_LIGHT"),
+            bg=c("CARD"),
             anchor="w",
         ).pack(fill=tk.X)
 
-        row = tk.Frame(info, bg=CARD)
-        row.pack(fill=tk.X, pady=(4, 0))
-        star_rating(row, loc["rating"], CARD).pack(side=tk.LEFT)
+        row = tk.Frame(info, bg=c("CARD"))
+        row.pack(fill=tk.X, pady=(6, 0))
+        star_rating(row, loc["rating"], c("CARD")).pack(side=tk.LEFT)
         tk.Label(
             row,
-            text=f"  ({loc['reviews']} reviews)  ·  ${loc['price']}",
+            text=f"  ({loc['reviews']} {t('reviews')})  ·  ${loc['price']}",
             font=("Segoe UI", 9),
-            fg=TEXT_LIGHT,
-            bg=CARD,
+            fg=c("TEXT_LIGHT"),
+            bg=c("CARD"),
         ).pack(side=tk.LEFT)
 
         fav = "❤" if store.is_favorite(loc["id"]) else "♡"
-        fav_btn = tk.Label(row, text=fav, font=("Segoe UI", 14), bg=CARD, cursor="hand2")
+        fav_btn = tk.Label(row, text=fav, font=("Segoe UI", 14), bg=c("CARD"), cursor="hand2")
         fav_btn.pack(side=tk.RIGHT)
 
         def open_detail(_=None, lid=loc["id"]):
@@ -179,6 +202,6 @@ class HomeFrame(tk.Frame):
             store.toggle_favorite(lid)
             self._refresh_list()
 
-        for w in (card, img_lbl, info):
-            w.bind("<Button-1>", open_detail)
+        for widget in (card, img_lbl, info):
+            widget.bind("<Button-1>", open_detail)
         fav_btn.bind("<Button-1>", toggle_fav)
