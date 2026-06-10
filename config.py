@@ -10,6 +10,12 @@ DEMO_USER = {
     "email": "azizbek@example.com",
 }
 
+# Optional full-window background image.
+# Put your image in assets/background.jpg and set BACKGROUND_IMAGE_PATH to that path.
+# Example: BACKGROUND_IMAGE_PATH = "assets/background.jpg"
+# Leave as None to use the normal theme background color.
+BACKGROUND_IMAGE_PATH = None
+
 # Desktop layout defaults
 APP_WIDTH = 1200
 APP_HEIGHT = 800

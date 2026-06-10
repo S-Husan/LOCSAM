@@ -9,12 +9,14 @@ from theme import CONTENT_MAX_WIDTH, PAD_LG, PAD_MD
 from ui_utils import (
     bottom_nav,
     c,
+    create_card,
     create_label,
     desktop_card_width,
     desktop_columns,
     entry_field,
     get_entry_value,
     load_image,
+    refresh_scroll_region,
     star_rating,
     styled_button,
 )
@@ -26,10 +28,10 @@ class HomeFrame(tk.Frame):
         self.controller = controller
         self.active_filter = "All"
         self.filter_buttons = {}
+        self._last_width = 0
         self._build_shell()
 
     def _build_shell(self):
-        # Top bar
         header = tk.Frame(self, bg=c("SURFACE"), padx=PAD_LG, pady=14)
         header.pack(fill=tk.X)
 
@@ -59,13 +61,13 @@ class HomeFrame(tk.Frame):
             lbl.pack(side=tk.LEFT)
             lbl.bind("<Button-1>", lambda e, f=frame_name: self.controller.show_frame(f))
 
-        # Search — centered, max width
         search_wrap = tk.Frame(self, bg=c("BACKGROUND"))
         search_wrap.pack(fill=tk.X, pady=(PAD_MD, 8))
         search_row = tk.Frame(search_wrap, bg=c("BACKGROUND"))
         search_row.pack(anchor="center")
         self.search_entry = entry_field(search_row, t("search_placeholder"), width=42)
         self.search_entry.pack(side=tk.LEFT, ipady=6)
+        self.search_entry.bind("<Return>", lambda e: self._apply_search())
         styled_button(
             search_row,
             t("go"),
@@ -74,7 +76,6 @@ class HomeFrame(tk.Frame):
             width=8,
         ).pack(side=tk.LEFT, padx=(10, 0))
 
-        # Filter tabs — centered
         tabs_wrap = tk.Frame(self, bg=c("BACKGROUND"))
         tabs_wrap.pack(fill=tk.X, pady=(0, 8))
         tabs = tk.Frame(tabs_wrap, bg=c("BACKGROUND"))
@@ -94,12 +95,11 @@ class HomeFrame(tk.Frame):
             btn.bind("<Button-1>", lambda e, tb=tab: self._set_filter(tb))
             self.filter_buttons[tab] = btn
 
-        # Content area
         content_wrap = tk.Frame(self, bg=c("BACKGROUND"))
         content_wrap.pack(fill=tk.BOTH, expand=True)
         from ui_utils import scrollable_frame
 
-        scroll_container, _, self.list_frame = scrollable_frame(content_wrap)
+        scroll_container, self.list_canvas, self.list_frame = scrollable_frame(content_wrap)
         scroll_container.pack(fill=tk.BOTH, expand=True, padx=PAD_LG, pady=4)
 
         self.bind("<Configure>", self._on_resize)
@@ -122,8 +122,12 @@ class HomeFrame(tk.Frame):
         self._refresh_list()
 
     def _on_resize(self, event):
-        if event.widget == self and event.width > 100:
-            self._refresh_list(event.width)
+        if event.widget != self or event.width < 200:
+            return
+        if abs(event.width - self._last_width) < 40:
+            return
+        self._last_width = event.width
+        self._refresh_list(event.width)
 
     def _nav_select(self, idx):
         frames = ["HomeFrame", "SearchFrame", "MyTicketsFrame", "FavoritesFrame", "ProfileFrame"]
@@ -142,44 +146,54 @@ class HomeFrame(tk.Frame):
         self._refresh_list()
 
     def _apply_search(self):
-        q = get_entry_value(self.search_entry, t("search_placeholder"))
-        self.controller.search_query = q
-        self.controller.show_frame("SearchFrame")
+        self._refresh_list()
+
+    def _current_search(self):
+        return get_entry_value(self.search_entry, t("search_placeholder"))
 
     def _refresh_list(self, width=None):
         for w in self.list_frame.winfo_children():
             w.destroy()
 
-        self._update_tabs()
-        w = min(width or self.winfo_width(), CONTENT_MAX_WIDTH)
+        self.update_idletasks()
+        w = width or self.winfo_width()
+        if w < 200:
+            w = CONTENT_MAX_WIDTH
+        w = min(w, CONTENT_MAX_WIDTH)
         cols = desktop_columns(w)
         card_w = desktop_card_width(w)
 
         grid = tk.Frame(self.list_frame, bg=c("BACKGROUND"))
-        grid.pack(anchor="center", padx=4, pady=4)
+        grid.pack(fill=tk.X, padx=4, pady=4)
 
-        locations = store.get_locations(self.active_filter)
+        for col in range(cols):
+            grid.grid_columnconfigure(col, weight=1, uniform="cards")
+
+        locations = store.get_locations(self.active_filter, self._current_search())
+
+        if not locations:
+            create_label(
+                grid,
+                "No places found.",
+                style="body",
+            ).grid(row=0, column=0, columnspan=cols, pady=40, padx=20)
+            refresh_scroll_region(self.list_canvas)
+            return
+
         for i, loc in enumerate(locations):
             cell = tk.Frame(grid, bg=c("BACKGROUND"))
             cell.grid(row=i // cols, column=i % cols, padx=10, pady=10, sticky="n")
-            for col in range(cols):
-                grid.grid_columnconfigure(col, weight=0)
             self._build_card(cell, loc, card_w)
 
-    def _build_card(self, parent, loc, card_w):
-        card = tk.Frame(
-            parent,
-            bg=c("CARD"),
-            highlightbackground=c("BORDER"),
-            highlightthickness=1,
-            cursor="hand2",
-            width=card_w,
-        )
-        card.pack()
-        card.pack_propagate(False)
+        refresh_scroll_region(self.list_canvas)
 
-        img_h = int(card_w * 0.5)
-        img = load_image(loc["image"], size=(card_w, img_h))
+    def _build_card(self, parent, loc, card_w):
+        card = create_card(parent, padx=0, pady=0)
+        card.pack()
+        card.config(cursor="hand2", width=card_w)
+
+        img_h = max(140, int(card_w * 0.5))
+        img = load_image(loc["image"], size=(card_w - 2, img_h))
         img_lbl = tk.Label(card, image=img, bg=c("CARD"))
         img_lbl.image = img
         img_lbl.pack()
@@ -219,6 +233,6 @@ class HomeFrame(tk.Frame):
             store.toggle_favorite(lid)
             self._refresh_list()
 
-        for widget in (card, img_lbl, info):
+        for widget in (card, img_lbl, info, row):
             widget.bind("<Button-1>", open_detail)
         fav_btn.bind("<Button-1>", toggle_fav)

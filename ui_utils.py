@@ -467,15 +467,27 @@ def bottom_nav(parent, items, active_index, on_select):
     return holder
 
 
+def refresh_scroll_region(canvas):
+    """Update canvas scrollregion after dynamic content changes."""
+    canvas.update_idletasks()
+    bbox = canvas.bbox("all")
+    if bbox:
+        canvas.configure(scrollregion=bbox)
+
+
 def scrollable_frame(parent, bg=None):
     bg = bg or c("BACKGROUND")
     container = tk.Frame(parent, bg=bg)
     canvas = tk.Canvas(container, bg=bg, highlightthickness=0, bd=0)
     scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
     inner = tk.Frame(canvas, bg=bg)
-    inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
     win = canvas.create_window((0, 0), window=inner, anchor="nw")
     canvas.configure(yscrollcommand=scrollbar.set)
+
+    def _on_inner_configure(_event=None):
+        refresh_scroll_region(canvas)
+
+    inner.bind("<Configure>", _on_inner_configure)
 
     def _on_configure(event):
         canvas.itemconfig(win, width=event.width)
@@ -490,6 +502,51 @@ def scrollable_frame(parent, bg=None):
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     container.pack(fill=tk.BOTH, expand=True)
     return container, canvas, inner
+
+
+def setup_optional_background(root):
+    """Optional resizable background image behind main content.
+
+    Put your image in assets/background.jpg and set BACKGROUND_IMAGE_PATH in config.py.
+    """
+    from config import BACKGROUND_IMAGE_PATH
+
+    if not BACKGROUND_IMAGE_PATH:
+        return None
+
+    path = BACKGROUND_IMAGE_PATH
+    if not os.path.isabs(path):
+        path = os.path.join(os.path.dirname(__file__), path)
+    if not os.path.exists(path):
+        return None
+
+    state = {"photo": None, "label": None}
+
+    try:
+        from PIL import Image, ImageTk
+    except ImportError:
+        return None
+
+    bg_label = tk.Label(root, bd=0)
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+    state["label"] = bg_label
+
+    def _resize(event=None):
+        w = root.winfo_width()
+        h = root.winfo_height()
+        if w < 2 or h < 2:
+            return
+        try:
+            img = Image.open(path).convert("RGB")
+            img = img.resize((w, h), Image.Resampling.LANCZOS)
+            state["photo"] = ImageTk.PhotoImage(img)
+            bg_label.configure(image=state["photo"])
+        except OSError:
+            bg_label.place_forget()
+
+    root.bind("<Configure>", _resize)
+    root.after(100, _resize)
+    return bg_label
 
 
 def show_language_dialog(parent, on_change):

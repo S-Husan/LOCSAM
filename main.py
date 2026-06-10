@@ -20,7 +20,7 @@ from register import RegisterFrame
 from search import SearchFrame
 from splash import SplashFrame
 from ticket_booking import TicketBookingFrame
-from ui_utils import c, configure_ttk_styles, ensure_assets
+from ui_utils import c, configure_ttk_styles, ensure_assets, setup_optional_background
 
 
 class LocsamApp(tk.Tk):
@@ -38,6 +38,7 @@ class LocsamApp(tk.Tk):
 
         ensure_assets()
         configure_ttk_styles()
+        setup_optional_background(self)
 
         self.container = tk.Frame(self, bg=c("BACKGROUND"))
         self.container.pack(fill=tk.BOTH, expand=True)

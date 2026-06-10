@@ -190,13 +190,22 @@ class DataStore:
                 results = sorted(results, key=lambda x: x["rating"], reverse=True)
             else:
                 results = [l for l in results if l["category"] == category]
-        if search:
-            q = search.lower()
-            results = [
-                l
-                for l in results
-                if q in l["name"].lower() or q in l["category"].lower()
-            ]
+        q = (search or "").strip().lower()
+        if q:
+            filtered = []
+            for loc in results:
+                haystack = " ".join(
+                    [
+                        str(loc.get("name", "")),
+                        str(loc.get("category", "")),
+                        str(loc.get("city", "")),
+                        str(loc.get("description", "")),
+                        str(loc.get("rating", "")),
+                    ]
+                ).lower()
+                if q in haystack:
+                    filtered.append(loc)
+            results = filtered
         return results
 
     def get_location(self, location_id):

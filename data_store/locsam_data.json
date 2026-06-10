@@ -13,6 +13,13 @@
       "email": "x@gmail.com",
       "password": "12345678",
       "created_at": "2026-06-10"
+    },
+    {
+      "id": 3,
+      "full_name": "husan",
+      "email": "2",
+      "password": "12345678",
+      "created_at": "2026-06-10"
     }
   ],
   "admins": [
@@ -227,22 +234,53 @@
       "price": 5,
       "status": "upcoming",
       "user_id": 1
+    },
+    {
+      "id": 4,
+      "user_id": 3,
+      "location_id": 4,
+      "location": "Amir Temur Mausoleum",
+      "date": "12",
+      "time": "10:00 AM",
+      "detail": "1 Adult Ticket",
+      "price": 8,
+      "status": "upcoming"
     }
   ],
-  "ticket_records": [],
+  "ticket_records": [
+    {
+      "id": 4,
+      "user_id": 3,
+      "location_id": 4,
+      "location": "Amir Temur Mausoleum",
+      "date": "12",
+      "time": "10:00 AM",
+      "detail": "1 Adult Ticket",
+      "price": 8,
+      "status": "upcoming"
+    }
+  ],
   "favorites": [],
   "reviews": [],
-  "contact_messages": [],
+  "contact_messages": [
+    {
+      "id": 1,
+      "name": "Husan",
+      "email": "x@gmail.com",
+      "message": "I lost myself",
+      "created_at": "2026-06-10 09:59"
+    }
+  ],
   "settings": {
     "language": "en",
     "dark_mode": true,
-    "remembered_user_id": null
+    "remembered_user_id": 2
   },
   "_next_ids": {
-    "users": 3,
+    "users": 4,
     "locations": 7,
-    "tickets": 4,
-    "contact": 1,
+    "tickets": 5,
+    "contact": 2,
     "gallery": 19
   }
 }
