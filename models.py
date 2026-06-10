@@ -224,11 +224,11 @@ class DataStore:
         self.locations.append(data)
 
         if gallery_image_keys:
-            for i, key in enumerate(gallery_image_keys[:3], start=1):
+            for image_path in gallery_image_keys[:3]:
                 gid = self._next_ids["gallery"]
                 self._next_ids["gallery"] += 1
                 self.gallery.append(
-                    {"id": gid, "location_id": lid, "image_path": f"{key}_{i}"}
+                    {"id": gid, "location_id": lid, "image_path": image_path}
                 )
         else:
             base = data.get("image", f"loc_{lid}")
@@ -246,13 +246,17 @@ class DataStore:
         for i, loc in enumerate(self.locations):
             if loc["id"] == location_id:
                 self.locations[i] = {**loc, **data, "id": location_id}
-                if gallery_image_keys:
+                if gallery_image_keys is not None:
                     self.gallery = [g for g in self.gallery if g["location_id"] != location_id]
-                    for idx, key in enumerate(gallery_image_keys[:3], start=1):
+                    for image_path in gallery_image_keys[:3]:
                         gid = self._next_ids["gallery"]
                         self._next_ids["gallery"] += 1
                         self.gallery.append(
-                            {"id": gid, "location_id": location_id, "image_path": f"{key}_{idx}"}
+                            {
+                                "id": gid,
+                                "location_id": location_id,
+                                "image_path": image_path,
+                            }
                         )
                 self.save()
                 return True

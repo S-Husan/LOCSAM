@@ -396,10 +396,11 @@ def load_image(name, size=(360, 200)):
     if key in _image_cache:
         return _image_cache[key]
     ensure_assets()
-    base = name.rsplit("_", 1)[0] if name.rsplit("_", 1)[-1].isdigit() else name
-    path = os.path.join(ASSETS_DIR, f"{base}.png")
+    # Try exact filename first (e.g. registan_2.png for gallery slots)
+    path = os.path.join(ASSETS_DIR, f"{name}.png")
     if not os.path.exists(path):
-        path = os.path.join(ASSETS_DIR, f"{name}.png")
+        base = name.rsplit("_", 1)[0] if name.rsplit("_", 1)[-1].isdigit() else name
+        path = os.path.join(ASSETS_DIR, f"{base}.png")
     if not os.path.exists(path):
         path = os.path.join(ASSETS_DIR, "registan.png")
     img = Image.open(path).convert("RGB")

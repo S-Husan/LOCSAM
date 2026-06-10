@@ -15,6 +15,17 @@ def _slug(name):
     return s or "location"
 
 
+def _sorted_gallery(gallery_items):
+    """Order gallery slots 1, 2, 3 by image_path suffix."""
+
+    def sort_key(item):
+        path = item.get("image_path", "")
+        suffix = path.rsplit("_", 1)[-1]
+        return int(suffix) if suffix.isdigit() else 0
+
+    return sorted(gallery_items, key=sort_key)
+
+
 def _copy_image_to_assets(src_path, dest_key):
     ensure_assets()
     dest = os.path.join(ASSETS_DIR, f"{dest_key}.png")
@@ -206,6 +217,10 @@ class LocationFormDialog(tk.Toplevel):
         self.entry_longitude.delete(0, tk.END)
         self.entry_longitude.insert(0, str(loc["longitude"]))
         self.main_img_label.config(text=f"Current: {loc.get('image', 'default')}.png")
+        existing = _sorted_gallery(store.get_gallery(loc["id"]))
+        for i, lbl in enumerate(self.gallery_labels):
+            if i < len(existing):
+                lbl.config(text=f"Current: {existing[i]['image_path']}.png")
 
     def _pick_main_image(self):
         path = filedialog.askopenfilename(
@@ -249,19 +264,25 @@ class LocationFormDialog(tk.Toplevel):
             if not _copy_image_to_assets(self.main_image_path, slug):
                 return
 
-        gallery_keys = []
-        for i, path in enumerate(self.image_paths):
-            if path:
-                key = f"{slug}"
-                dest_key = f"{key}_{i + 1}"
-                if _copy_image_to_assets(path, dest_key):
-                    gallery_keys.append(key)
-            elif self.location:
-                gallery_keys.append(slug)
-
         if not self.location and not self.main_image_path:
             messagebox.showerror("Validation", "Please select a main cover image.")
             return
+
+        existing_gallery = []
+        if self.location:
+            existing_gallery = _sorted_gallery(store.get_gallery(self.location["id"]))
+
+        gallery_paths = []
+        for i in range(3):
+            dest_key = f"{slug}_{i + 1}"
+            if self.image_paths[i]:
+                if not _copy_image_to_assets(self.image_paths[i], dest_key):
+                    return
+                gallery_paths.append(dest_key)
+            elif i < len(existing_gallery):
+                gallery_paths.append(existing_gallery[i]["image_path"])
+            else:
+                gallery_paths.append(dest_key)
 
         data = {
             "name": name,
@@ -281,10 +302,10 @@ class LocationFormDialog(tk.Toplevel):
             store.update_location(
                 self.location["id"],
                 data,
-                gallery_image_keys=gallery_keys if gallery_keys else None,
+                gallery_image_keys=gallery_paths,
             )
         else:
-            store.add_location(data, gallery_image_keys=gallery_keys or [slug])
+            store.add_location(data, gallery_image_keys=gallery_paths)
 
         self.on_save()
         self.destroy()

@@ -35,12 +35,7 @@ class AdminLoginFrame(tk.Frame):
         create_label(card, "Admin Login", style="title", bg=c("CARD")).pack(
             anchor="w", pady=(0, 4)
         )
-        create_label(
-            card,
-            "Access the LOCSAM admin panel",
-            style="small",
-            bg=c("CARD"),
-        ).pack(anchor="w", pady=(0, 24))
+        create_label( card, "Access the LOCSAM admin panel", style="small", bg=c("CARD"), ).pack(anchor="w", pady=(0, 24))
 
         create_label(card, "Username", style="body", bg=c("CARD")).pack(anchor="w")
         self.user_entry = entry_field(card, "Enter admin username")
@@ -59,12 +54,7 @@ class AdminLoginFrame(tk.Frame):
             width=24,
         ).pack()
 
-        create_label(
-            card,
-            "Default: admin / admin123",
-            style="tiny",
-            bg=c("CARD"),
-        ).pack(pady=14)
+        # create_label(card, "Default: admin / admin123", style="tiny", bg=c("CARD"),).pack(pady=14)
 
     def _login(self):
         username = get_entry_value(self.user_entry, "Enter admin username")

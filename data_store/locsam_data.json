@@ -13,20 +13,6 @@
       "email": "x@gmail.com",
       "password": "12345678",
       "created_at": "2026-06-10"
-    },
-    {
-      "id": 3,
-      "full_name": "husan",
-      "email": "2",
-      "password": "12345678",
-      "created_at": "2026-06-10"
-    },
-    {
-      "id": 4,
-      "full_name": "Sayfiyev Husan",
-      "email": "Sayfiyevhusan77@gmail.com",
-      "password": "12345678",
-      "created_at": "2026-06-10"
     }
   ],
   "admins": [
@@ -44,9 +30,9 @@
       "city": "Samarkand, Uzbekistan",
       "description": "Registan Square is the heart of Samarkand and one of the most magnificent squares in the world. It is surrounded by three majestic madrasahs built during the Timurid era and represents the cultural and architectural heritage of Uzbekistan.",
       "rating": 4.8,
-      "reviews": 230,
-      "price": 10,
-      "open_time": "06:00 AM - 09:00 PM",
+      "reviews": 543,
+      "price": 2.0,
+      "open_time": "07:00 AM- 09:00 PM",
       "latitude": 39.6542,
       "longitude": 66.9747,
       "image": "registan"
@@ -58,9 +44,9 @@
       "city": "Samarkand, Uzbekistan",
       "description": "A famous necropolis containing beautifully decorated mausoleums and sacred Islamic architecture.",
       "rating": 4.7,
-      "reviews": 180,
-      "price": 5,
-      "open_time": "06:00 AM - 09:00 PM",
+      "reviews": 1230,
+      "price": 1.0,
+      "open_time": "08:00 AM - 09:00 PM",
       "latitude": 39.6622,
       "longitude": 66.9797,
       "image": "shah_i_zinda"
@@ -73,8 +59,8 @@
       "description": "One of the largest and most impressive mosques in Central Asia built by Amir Timur.",
       "rating": 4.6,
       "reviews": 150,
-      "price": 5,
-      "open_time": "06:00 AM - 09:00 PM",
+      "price": 5.0,
+      "open_time": "07:00 AM - 09:00 PM",
       "latitude": 39.6605,
       "longitude": 66.979,
       "image": "bibi_khanym"
@@ -87,7 +73,7 @@
       "description": "The final resting place of Amir Timur and an important historical monument.",
       "rating": 4.9,
       "reviews": 210,
-      "price": 8,
+      "price": 8.0,
       "open_time": "06:00 AM - 09:00 PM",
       "latitude": 39.6486,
       "longitude": 66.9697,
@@ -101,7 +87,7 @@
       "description": "An observatory established by Ulughbek that contributed significantly to astronomy.",
       "rating": 4.5,
       "reviews": 120,
-      "price": 5,
+      "price": 5.0,
       "open_time": "06:00 AM - 09:00 PM",
       "latitude": 39.6747,
       "longitude": 66.9967,
@@ -115,7 +101,7 @@
       "description": "Known for its stunning golden interior and educational significance.",
       "rating": 4.7,
       "reviews": 170,
-      "price": 6,
+      "price": 6.0,
       "open_time": "06:00 AM - 09:00 PM",
       "latitude": 39.6545,
       "longitude": 66.975,
@@ -124,92 +110,92 @@
   ],
   "gallery": [
     {
-      "id": 1,
+      "id": 31,
       "location_id": 1,
       "image_path": "registan_1"
     },
     {
-      "id": 2,
+      "id": 32,
       "location_id": 1,
       "image_path": "registan_2"
     },
     {
-      "id": 3,
+      "id": 33,
       "location_id": 1,
       "image_path": "registan_3"
     },
     {
-      "id": 4,
+      "id": 34,
       "location_id": 2,
       "image_path": "shah_i_zinda_1"
     },
     {
-      "id": 5,
+      "id": 35,
       "location_id": 2,
       "image_path": "shah_i_zinda_2"
     },
     {
-      "id": 6,
+      "id": 36,
       "location_id": 2,
       "image_path": "shah_i_zinda_3"
     },
     {
-      "id": 7,
+      "id": 37,
       "location_id": 3,
       "image_path": "bibi_khanym_1"
     },
     {
-      "id": 8,
+      "id": 38,
       "location_id": 3,
       "image_path": "bibi_khanym_2"
     },
     {
-      "id": 9,
+      "id": 39,
       "location_id": 3,
       "image_path": "bibi_khanym_3"
     },
     {
-      "id": 10,
+      "id": 40,
       "location_id": 4,
       "image_path": "amir_temur_1"
     },
     {
-      "id": 11,
+      "id": 41,
       "location_id": 4,
       "image_path": "amir_temur_2"
     },
     {
-      "id": 12,
+      "id": 42,
       "location_id": 4,
       "image_path": "amir_temur_3"
     },
     {
-      "id": 13,
+      "id": 43,
       "location_id": 5,
       "image_path": "ulughbek_1"
     },
     {
-      "id": 14,
+      "id": 44,
       "location_id": 5,
       "image_path": "ulughbek_2"
     },
     {
-      "id": 15,
+      "id": 45,
       "location_id": 5,
       "image_path": "ulughbek_3"
     },
     {
-      "id": 16,
+      "id": 46,
       "location_id": 6,
       "image_path": "tillya_kori_1"
     },
     {
-      "id": 17,
+      "id": 47,
       "location_id": 6,
       "image_path": "tillya_kori_2"
     },
     {
-      "id": 18,
+      "id": 48,
       "location_id": 6,
       "image_path": "tillya_kori_3"
     }
@@ -241,17 +227,6 @@
       "price": 5,
       "status": "upcoming",
       "user_id": 1
-    },
-    {
-      "id": 4,
-      "user_id": 3,
-      "location_id": 4,
-      "location": "Amir Temur Mausoleum",
-      "date": "12",
-      "time": "10:00 AM",
-      "detail": "1 Adult Ticket",
-      "price": 8,
-      "status": "upcoming"
     }
   ],
   "ticket_records": [
@@ -288,6 +263,6 @@
     "locations": 7,
     "tickets": 5,
     "contact": 2,
-    "gallery": 19
+    "gallery": 49
   }
 }
