@@ -381,7 +381,7 @@
   "settings": {
     "language": "en",
     "dark_mode": true,
-    "remembered_user_id": null
+    "remembered_user_id": 2
   },
   "_next_ids": {
     "users": 5,
