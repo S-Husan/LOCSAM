@@ -106,6 +106,48 @@
       "latitude": 39.6545,
       "longitude": 66.975,
       "image": "tillya_kori"
+    },
+    {
+      "name": "Family  Park",
+      "category": "Popular",
+      "city": "Samarkand, Uzbekistan",
+      "description": "Samarkand’s premier Family Park on Narpay Street is a vibrant entertainment and leisure hub. It offers a refreshing blend of indoor and outdoor activities perfect for unwinding after a day of sightseeing. Featuring a lively ice arena, bowling alley, cinema, and diverse dining options, it provides fun for all ages.",
+      "rating": 4.8,
+      "reviews": 153,
+      "price": 2.0,
+      "open_time": "09:00 AM - 09:00 PM",
+      "latitude": 39.65,
+      "longitude": 66.97,
+      "image": "family_park",
+      "id": 7
+    },
+    {
+      "name": "Samarkand City",
+      "category": "Popular",
+      "city": "Samarkand, Uzbekistan",
+      "description": "amarkand, a legendary gem of the Great Silk Road, is a mesmerizing blend of ancient history and vibrant Central Asian culture. Famous for its monumental Islamic architecture, the city invites travelers to step into a fairy tale of glowing turquoise domes, intricate mosaic tiles, and timeless bazaars.",
+      "rating": 4.0,
+      "reviews": 73,
+      "price": 3.0,
+      "open_time": "10:00 AM - 09:00 PM",
+      "latitude": 39.65,
+      "longitude": 66.97,
+      "image": "samarkand_city",
+      "id": 8
+    },
+    {
+      "name": "Bibi Khanym",
+      "category": "Mosque",
+      "city": "Samarkand, Uzbekistan",
+      "description": "The Bibi-Khanym Mosque in Samarkand is one of the Islamic world's most grandiose historical structures. Built by Tamerlane (Amir Timur) between 1399 and 1404, this monumental architectural masterpiece was designed to dwarf all others. Its massive turquoise domes and towering 50-meter portals make it an awe-inspiring highlight of the Silk Road.",
+      "rating": 4.0,
+      "reviews": 120,
+      "price": 4.0,
+      "open_time": "10:00 AM - 09:00 PM",
+      "latitude": 39.65,
+      "longitude": 66.97,
+      "image": "bibi_khanym",
+      "id": 9
     }
   ],
   "gallery": [
@@ -198,6 +240,51 @@
       "id": 48,
       "location_id": 6,
       "image_path": "tillya_kori_3"
+    },
+    {
+      "id": 49,
+      "location_id": 7,
+      "image_path": "family_park_1"
+    },
+    {
+      "id": 50,
+      "location_id": 7,
+      "image_path": "family_park_2"
+    },
+    {
+      "id": 51,
+      "location_id": 7,
+      "image_path": "family_park_3"
+    },
+    {
+      "id": 52,
+      "location_id": 8,
+      "image_path": "samarkand_city_1"
+    },
+    {
+      "id": 53,
+      "location_id": 8,
+      "image_path": "samarkand_city_2"
+    },
+    {
+      "id": 54,
+      "location_id": 8,
+      "image_path": "samarkand_city_3"
+    },
+    {
+      "id": 55,
+      "location_id": 9,
+      "image_path": "bibi_khanym_1"
+    },
+    {
+      "id": 56,
+      "location_id": 9,
+      "image_path": "bibi_khanym_2"
+    },
+    {
+      "id": 57,
+      "location_id": 9,
+      "image_path": "bibi_khanym_3"
     }
   ],
   "tickets": [
@@ -242,7 +329,12 @@
       "status": "upcoming"
     }
   ],
-  "favorites": [],
+  "favorites": [
+    {
+      "user_id": 2,
+      "location_id": 3
+    }
+  ],
   "reviews": [],
   "contact_messages": [
     {
@@ -256,13 +348,13 @@
   "settings": {
     "language": "uz",
     "dark_mode": true,
-    "remembered_user_id": null
+    "remembered_user_id": 2
   },
   "_next_ids": {
     "users": 5,
-    "locations": 7,
+    "locations": 10,
     "tickets": 5,
     "contact": 2,
-    "gallery": 49
+    "gallery": 58
   }
 }
