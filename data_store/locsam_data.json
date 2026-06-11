@@ -148,6 +148,20 @@
       "longitude": 66.97,
       "image": "bibi_khanym",
       "id": 9
+    },
+    {
+      "name": "Al-buhoriy",
+      "category": "Mosque",
+      "city": "Samarkand, Uzbekistan",
+      "description": "al-dd",
+      "rating": 4.9,
+      "reviews": 0,
+      "price": 2.0,
+      "open_time": "06:00 AM - 09:00 PM",
+      "latitude": 39.65,
+      "longitude": 66.97,
+      "image": "al_buhoriy",
+      "id": 10
     }
   ],
   "gallery": [
@@ -285,6 +299,21 @@
       "id": 57,
       "location_id": 9,
       "image_path": "bibi_khanym_3"
+    },
+    {
+      "id": 58,
+      "location_id": 10,
+      "image_path": "al_buhoriy_1"
+    },
+    {
+      "id": 59,
+      "location_id": 10,
+      "image_path": "al_buhoriy_2"
+    },
+    {
+      "id": 60,
+      "location_id": 10,
+      "image_path": "al_buhoriy_3"
     }
   ],
   "tickets": [
@@ -332,6 +361,10 @@
   "favorites": [
     {
       "user_id": 2,
+      "location_id": 2
+    },
+    {
+      "user_id": 2,
       "location_id": 3
     }
   ],
@@ -346,15 +379,15 @@
     }
   ],
   "settings": {
-    "language": "uz",
+    "language": "en",
     "dark_mode": true,
-    "remembered_user_id": 2
+    "remembered_user_id": null
   },
   "_next_ids": {
     "users": 5,
-    "locations": 10,
+    "locations": 11,
     "tickets": 5,
     "contact": 2,
-    "gallery": 58
+    "gallery": 61
   }
 }
