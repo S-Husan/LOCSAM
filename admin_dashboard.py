@@ -146,11 +146,13 @@ class AdminDashboardFrame(tk.Frame):
         for w in self.users_list.winfo_children():
             w.destroy()
         q = get_entry_value(self.user_search, "Search users...").lower()
-        users = [
-            u
-            for u in store.users
-            if not q or q in u["email"].lower() or q in u["full_name"].lower()
-        ]
+        users = store.get_users()
+        if q:
+            users = [
+                u
+                for u in users
+                if q in u["email"].lower() or q in u["full_name"].lower()
+            ]
 
         for u in users:
             row = tk.Frame(self.users_list, bg=c("CARD"), padx=12, pady=10)
@@ -208,7 +210,8 @@ class AdminDashboardFrame(tk.Frame):
     def _refresh_locations(self):
         for w in self.loc_list.winfo_children():
             w.destroy()
-        for loc in store.locations:
+        locations = store.get_locations("All", "")
+        for loc in locations:
             row = tk.Frame(self.loc_list, bg=c("CARD"), padx=12, pady=10)
             row.pack(fill=tk.X, pady=5)
             tk.Label(
@@ -298,12 +301,13 @@ class AdminDashboardFrame(tk.Frame):
     def _build_contact(self):
         self._title("Contact Messages")
         _, _, frame = scrollable_frame(self.content)
-        if not store.contact_messages:
+        messages = store.get_contact_messages()
+        if not messages:
             tk.Label(frame, text="No messages yet.", bg=c("BACKGROUND"), fg=c("TEXT_LIGHT")).pack(
                 pady=20
             )
             return
-        for msg in store.contact_messages:
+        for msg in messages:
             card = tk.Frame(frame, bg=c("CARD"), padx=12, pady=10)
             card.pack(fill=tk.X, pady=5)
             tk.Label(
